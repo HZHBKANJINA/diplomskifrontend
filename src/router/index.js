@@ -11,7 +11,8 @@ const routes = [
   {
     path:'/',
     name:'LoginView',
-    component:LoginView
+    component:LoginView,
+    meta: { public: true }
   },
   {
     path: '/pocetna',
@@ -26,7 +27,8 @@ const routes = [
   {
     path:'/registracija',
     name:'RegisterView',
-    component:RegisterView
+    component:RegisterView,
+    meta: { public: true }
   },
   {
     path:'/klubovi',
@@ -49,5 +51,24 @@ const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes
 })
+
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('token');
+  const publicRoutes = ['/', '/registracija'];
+
+  if (!token && !publicRoutes.includes(to.path)) {
+    // nije prijavljen i pokušava do zaštićene rute
+    return next('/');
+  }
+
+  if (token && publicRoutes.includes(to.path)) {
+    // već je prijavljen pa ga preusmjeri sa login/registracija na pocetnu
+    return next('/pocetna');
+  }
+
+  // sve ostalo je dozvoljeno
+  next();
+});
+
 
 export default router
